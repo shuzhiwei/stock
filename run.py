@@ -13,7 +13,6 @@ urls = (
 )
 
 app = web.application(urls, globals())
-web.header("Access-Control-Allow-Origin", "*")
 parent_dir = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
 config = configparser.ConfigParser()
 full_path = parent_dir + '/confs/config.ini'
@@ -24,6 +23,7 @@ obj = 'stock'
 class View:
     def POST(self):
         try:
+            web.header("Access-Control-Allow-Origin", "*")
             token = web.input().token
             # date_data = web.input().date_data
             date_ts = int(time.time())
