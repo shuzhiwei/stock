@@ -9,7 +9,7 @@ from database import stock_great_retail
 from tools.sync_policy import syncPolicy
 
 urls = (
-    '/stock/view', 'View',
+    '/view', 'View',
 )
 
 app = web.application(urls, globals())
