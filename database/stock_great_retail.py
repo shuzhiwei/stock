@@ -23,7 +23,7 @@ def insert_code(code, update_date, shareholder_falling_count, sdlu_great_retail_
                sdlu_great_retail_count=sdlu_great_retail_count,
                float_share=float_share)
 
-def delete_code(id):
+def delete_code(code, update_date):
     db.delete('stock_great_retail', where="id=$id", vars=locals())
 
 def get_datas(date_data):
