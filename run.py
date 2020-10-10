@@ -13,6 +13,7 @@ urls = (
 )
 
 app = web.application(urls, globals())
+web.header("Access-Control-Allow-Origin", "*")
 parent_dir = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
 config = configparser.ConfigParser()
 full_path = parent_dir + '/confs/config.ini'
