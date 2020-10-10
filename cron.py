@@ -75,7 +75,7 @@ if __name__ == "__main__":
     start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
     end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
     # start_date = '20200901'
-    end_date = '20201009'
+    # end_date = '20201009'
 
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
