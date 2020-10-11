@@ -55,8 +55,8 @@ class View:
                             d_list.append(d_dict)
                         return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
                     else:
-                        again_ts = date_ts - 24*3600
-                        date_data = time.strftime('%Y%m%d', time.localtime(again_ts))
+                        date_ts = date_ts - 24*3600
+                        date_data = time.strftime('%Y%m%d', time.localtime(date_ts))
                         # return json.dumps({'status': 'fail', 'code': 15, 'message': 'no datas'})
             else:
                 return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
