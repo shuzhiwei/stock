@@ -51,7 +51,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                     if tds:
                         name = tds[0].find_all('a')[0].get_text().strip()
                         addSubStore = tds[3].get_text().strip()
-                        if len(name) <= 3 and (addSubStore == '新进' or addSubStore == '不变' or addSubStore != '限售股流通' or float(addSubStore[:-1]) > 0 ):
+                        if len(name) <= 3 and ((addSubStore == '新进' or addSubStore == '不变') or (addSubStore != '限售股流通' and float(addSubStore[:-1]) > 0 )):
                             sdluCount += 1
 
                 # 股东人数
