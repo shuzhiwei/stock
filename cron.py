@@ -89,30 +89,33 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                 stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFalling, sdluCount, df.values[0][0])
                 print('写入成功')
 
+def cron():
+    while True:
+        # 获取当前时间
+        end_ts =int(time.time())
+        start_ts = end_ts - 30*24*3600
+        start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
+        end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
+        # start_date = '20200901'
+        # end_date = '20201009'
 
-if __name__ == "__main__":
-    # 获取当前时间
-    end_ts =int(time.time())
-    start_ts = end_ts - 30*24*3600
-    start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
-    end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
-    # start_date = '20200901'
-    # end_date = '20201009'
+        is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
+        is_open = is_open.values[0][2]
+        if is_open:
+            datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
+            a = 0
+            for data in datas.values:
+                # code = '688005.SH'
+                code = data[0]
+                code_name = data[1]
+                if a and a % 500 == 0:
+                    print('开始睡眠1min...')
+                    time.sleep(60)
+                ifFirstHardenBoard(pro, code, start_date, end_date, code_name)
+                a += 1
+                # break
+        time.sleep(24*3600)
 
-    is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
-    is_open = is_open.values[0][2]
-    if is_open:
-        logger.debug('start run...')
-        datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
-        a = 0
-        for data in datas.values:
-            # code = '688005.SH'
-            code = data[0]
-            code_name = data[1]
-            if a and a % 500 == 0:
-                print('开始睡眠1min...')
-                time.sleep(60)
-            ifFirstHardenBoard(pro, code, start_date, end_date, code_name)
-            a += 1
-            # break
+# if __name__ == "__main__":
+#     cron()
         
