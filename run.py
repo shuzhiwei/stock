@@ -7,7 +7,6 @@ from collections import OrderedDict
 from logger.logger import logger
 from database import stock_great_retail
 from tools.sync_policy import syncPolicy
-from cron import cron
 
 urls = (
     '/view', 'View',
@@ -86,9 +85,5 @@ if __name__ == "__main__":
     logger.debug('start thread sync policy ...')
     t1.start()
 
-    t2 = threading.Thread(target=cron)
-    logger.debug('start thread cron ...')
-    t2.start()
-    
     logger.debug('start run ...')
     app.run()
