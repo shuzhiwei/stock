@@ -28,26 +28,19 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
         if len(df[df.harden_board == 1]) == 1:
             logger.info(cur_data.ts_code)
 
-            # 股东人数
-            url = 'http://www.yidiancangwei.com/gudong/renshu_' + str(cur_data.ts_code).split('.')[0] + '.html'
-            con = requests.get(url).text
-            obj=BeautifulSoup(con,'html.parser')
-            tbody = obj.find_all('tbody', class_='Tbody')[0]
-            trs = tbody.find_all('tr')
-            shareholdersFallingCount = 0
-            for tr in trs:
-                tds = tr.find_all('td')
-                _date = tds[0].text.strip()
-                _renShu = tds[1].text.strip()
-                _renShuChange = tds[2].text.strip()
-                if _renShuChange != '-':
-                    if float(_renShuChange[:-1]) < 0:
-                        shareholdersFallingCount += 1
-
             # 十大流通股东
             url_liutong = 'http://www.yidiancangwei.com/gudong/sdlt_' + code.split('.')[0] + '.html'
             con = requests.get(url_liutong).text
             obj=BeautifulSoup(con,'html.parser')
+            # 获取最新日期
+            try:
+                d = obj.find_all('div', class_='RankingListDate')[0]
+                d = d.find_all('a')[0].get_text()
+                if d < '2020-01-01':
+                    return
+            except Exception:
+                return
+
             div = obj.find_all('div', class_='TabBox')[0]
             trs = div.find_all('tr')
             sdluCount = 0
@@ -60,11 +53,40 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                         # print(name, addSubStore)
                         sdluCount += 1
 
+            # 股东人数
+            url = 'http://www.yidiancangwei.com/gudong/renshu_' + str(cur_data.ts_code).split('.')[0] + '.html'
+            con = requests.get(url).text
+            obj=BeautifulSoup(con,'html.parser')
+            tbody = obj.find_all('tbody', class_='Tbody')[0]
+            trs = tbody.find_all('tr')
+            tmp_list = []
+            for tr in trs:
+                tds = tr.find_all('td')
+                _date = tds[0].text.strip()
+                if _date < d:
+                    break
+                _renShu = tds[1].text.strip()
+                _renShuChange = tds[2].text.strip()
+                tmp_list.append((_date, _renShu, _renShuChange))
+            
+            shareholdersFalling = 0
+            if tmp_list:
+                renShuChange = float(tmp_list[0][1]) - float(tmp_list[-1][1])
+                renShuChangeRate = 0
+
+                for b in tmp_list:
+                    print(b)
+                    if b[2] and b[2] != '-':
+                        renShuChangeRate += float(b[2][:-1])
+
+                if renShuChange < 0 and renShuChangeRate < 0:
+                    shareholdersFalling = 1
+
             # 流通市值
             df = pro.daily_basic(ts_code=code, trade_date=cur_data.trade_date, fields='float_share')
 
-            if shareholdersFallingCount > 0 and sdluCount >= 6 and df.values[0][0] < 1000000:
-                stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFallingCount, sdluCount, df.values[0][0])
+            if shareholdersFalling == 1 and sdluCount >= 6 and df.values[0][0] < 1000000:
+                stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFalling, sdluCount, df.values[0][0])
                 print('写入成功')
 
 
@@ -75,7 +97,7 @@ if __name__ == "__main__":
     start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
     end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
     # start_date = '20200901'
-    end_date = '20201009'
+    # end_date = '20201009'
 
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
