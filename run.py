@@ -26,8 +26,8 @@ class View:
             web.header("Access-Control-Allow-Origin", "*")
             token = web.input().token
             # date_data = web.input().date_data
-            date_ts = int(time.time())
-            date_data = time.strftime('%Y%m%d', time.localtime(date_ts))
+            # date_ts = int(time.time())
+            # date_data = time.strftime('%Y%m%d', time.localtime(date_ts))
     
             try:
                 parse_token = jwt.decode(token, 'secret', algorithms='HS256')
