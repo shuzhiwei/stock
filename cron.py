@@ -1,4 +1,5 @@
 import time, requests
+import traceback
 import pandas as pd
 import numpy as np
 import tushare as ts
@@ -26,7 +27,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
     cur_flag = df.loc[0].harden_board == 1
     if cur_flag:
         if len(df[df.harden_board == 1]) == 1:
-            logger.info(cur_data.ts_code)
+            logger.debug(cur_data.ts_code)
 
             # 十大流通股东
             url_liutong = 'http://www.yidiancangwei.com/gudong/sdlt_' + code.split('.')[0] + '.html'
@@ -49,8 +50,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                 if tds:
                     name = tds[0].find_all('a')[0].get_text().strip()
                     addSubStore = tds[3].get_text().strip()
-                    if len(name) <= 3 and (addSubStore == '新进' or addSubStore == '不变' or float(addSubStore[:-1]) > 0 ):
-                        # print(name, addSubStore)
+                    if len(name) <= 3 and (addSubStore == '新进' or addSubStore == '不变' or addSubStore != '限售股流通' or float(addSubStore[:-1]) > 0 ):
                         sdluCount += 1
 
             # 股东人数
@@ -75,7 +75,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                 renShuChangeRate = 0
 
                 for b in tmp_list:
-                    print(b)
+                    logger.debug(b)
                     if b[2] and b[2] != '-':
                         renShuChangeRate += float(b[2][:-1])
 
@@ -87,34 +87,40 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
 
             if shareholdersFalling == 1 and sdluCount >= 6 and df.values[0][0] < 1000000:
                 stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFalling, sdluCount, float(str(df.values[0][0])))
-                print('写入成功')
+                logger.debug('写入成功')
 
 def cron():
-    while True:
-        # 获取当前时间
-        end_ts =int(time.time())
-        start_ts = end_ts - 30*24*3600
-        start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
-        end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
-        # start_date = '20200901'
-        # end_date = '20201009'
+    try:
+        while True:
+            # 获取当前时间
+            end_ts =int(time.time())
+            start_ts = end_ts - 30*24*3600
+            start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
+            end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
+            # start_date = '20200901'
+            # end_date = '20201009'
 
-        is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
-        is_open = is_open.values[0][2]
-        if is_open:
-            datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
-            a = 0
-            for data in datas.values:
-                # code = '688005.SH'
-                code = data[0]
-                code_name = data[1]
-                if a and a % 500 == 0:
-                    print('开始睡眠1min...')
-                    time.sleep(60)
-                ifFirstHardenBoard(pro, code, start_date, end_date, code_name)
-                a += 1
-                # break
-        time.sleep(24*3600)
+            is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
+            is_open = is_open.values[0][2]
+            if is_open:
+                datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
+                a = 0
+                for data in datas.values:
+                    # code = '688005.SH'
+                    code = data[0]
+                    code_name = data[1]
+                    if a and a % 500 == 0:
+                        print('开始睡眠1min...')
+                        time.sleep(60)
+                    ifFirstHardenBoard(pro, code, start_date, end_date, code_name)
+                    a += 1
+                    # break
+            time.sleep(24*3600)
+    except Exception as e:
+        logger.error(e)
+        logger.error(traceback.format_exc())
+
+
 
 # if __name__ == "__main__":
 #     cron()
