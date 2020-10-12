@@ -51,6 +51,7 @@ class View:
                         d_dict['shareholder_falling_count'] = i.shareholder_falling_count
                         d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
                         d_dict['float_share'] = i.float_share
+                        d_dict['name'] = i.name
                         d_list.append(d_dict)
                     return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
                 else:
