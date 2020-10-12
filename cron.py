@@ -14,7 +14,7 @@ token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 ts.set_token(token)
 pro = ts.pro_api()
 
-def ifFirstHardenBoard(pro, code, start_date, end_date, name):
+def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
     df = pro.daily(ts_code=code, start_date=start_date, end_date=end_date)
     # print(df)
     if df.empty:
@@ -80,17 +80,16 @@ if __name__ == "__main__":
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
     if is_open:
-        datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
+        datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
         a = 0
         for data in datas.values:
             # code = '688005.SH'
             code = data[0]
-            name = data[2]
-            print(code, name)
+            code_name = data[1]
             if a and a % 500 == 0:
                 print('开始睡眠1min...')
                 time.sleep(60)
-            ifFirstHardenBoard(pro, code, start_date, end_date, name)
+            ifFirstHardenBoard(pro, code, start_date, end_date, code_name)
             a += 1
             # break
         
