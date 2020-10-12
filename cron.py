@@ -64,7 +64,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
             df = pro.daily_basic(ts_code=code, trade_date=cur_data.trade_date, fields='float_share')
 
             if shareholdersFallingCount > 0 and sdluCount >= 6 and df.values[0][0] < 1000000:
-                stock_great_retail.insert_code(code, name, cur_data.trade_date, shareholdersFallingCount, sdluCount, df.values[0][0])
+                stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFallingCount, sdluCount, df.values[0][0])
                 print('写入成功')
 
 
@@ -80,6 +80,7 @@ if __name__ == "__main__":
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
     if is_open:
+        logger.debug('start run...')
         datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
         a = 0
         for data in datas.values:
