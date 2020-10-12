@@ -17,14 +17,21 @@ password = config.get('mysql', 'password')
 db = web.database(dbn='mysql',host=host, port=port, user=user, pw=password, db=db)
 
 
-def insert_code(code, update_date, shareholder_falling_count, sdlu_great_retail_count, float_share):
-    db.insert('stock_great_retail', code=code, update_date=update_date, shareholder_falling_count=shareholder_falling_count, sdlu_great_retail_count=sdlu_great_retail_count, float_share=float_share)
+def insert_code(code, name, update_date, shareholder_falling_count, sdlu_great_retail_count, float_share):
+    db.insert('stock_great_retail', code=code, name=name, update_date=update_date, shareholder_falling_count=shareholder_falling_count, sdlu_great_retail_count=sdlu_great_retail_count, float_share=float_share)
 
 def delete_code(code, update_date):
     db.delete('stock_great_retail', where="id=$id", vars=locals())
 
 def get_datas(date_data):
     res = db.select('stock_great_retail', where='update_date=$date_data', vars=locals())
+    res_list = []
+    for i in res:
+        res_list.append(i)
+    return res_list
+
+def get_all_datas():
+    res = db.select('stock_great_retail', order="update_date desc")
     res_list = []
     for i in res:
         res_list.append(i)

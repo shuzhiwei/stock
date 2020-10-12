@@ -14,7 +14,7 @@ token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 ts.set_token(token)
 pro = ts.pro_api()
 
-def ifFirstHardenBoard(pro, code, start_date, end_date):
+def ifFirstHardenBoard(pro, code, start_date, end_date, name):
     df = pro.daily(ts_code=code, start_date=start_date, end_date=end_date)
     # print(df)
     if df.empty:
@@ -64,7 +64,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date):
             df = pro.daily_basic(ts_code=code, trade_date=cur_data.trade_date, fields='float_share')
 
             if shareholdersFallingCount > 0 and sdluCount >= 6 and df.values[0][0] < 1000000:
-                stock_great_retail.insert_code(code, cur_data.trade_date, shareholdersFallingCount, sdluCount, df.values[0][0])
+                stock_great_retail.insert_code(code, name, cur_data.trade_date, shareholdersFallingCount, sdluCount, df.values[0][0])
                 print('写入成功')
 
 
@@ -75,21 +75,22 @@ if __name__ == "__main__":
     start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
     end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
     # start_date = '20200901'
-    # end_date = '20201009'
+    end_date = '20201009'
 
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
     if is_open:
-        data = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
-        codes = data.ts_code.values
+        datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
         a = 0
-        for code in codes:
+        for data in datas.values:
             # code = '688005.SH'
-            print(code)
+            code = data[0]
+            name = data[2]
+            print(code, name)
             if a and a % 500 == 0:
                 print('开始睡眠1min...')
                 time.sleep(60)
-            ifFirstHardenBoard(pro, code, start_date, end_date)
+            ifFirstHardenBoard(pro, code, start_date, end_date, name)
             a += 1
             # break
         
