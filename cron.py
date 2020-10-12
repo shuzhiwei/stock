@@ -86,7 +86,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
             df = pro.daily_basic(ts_code=code, trade_date=cur_data.trade_date, fields='float_share')
 
             if shareholdersFalling == 1 and sdluCount >= 6 and df.values[0][0] < 1000000:
-                stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFalling, sdluCount, df.values[0][0])
+                stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFalling, sdluCount, float(str(df.values[0][0])))
                 print('写入成功')
 
 def cron():
