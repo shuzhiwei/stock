@@ -19,7 +19,7 @@ CREATE TABLE stock_private (
 CREATE TABLE stock_private1 (
     private_name varchar(100),
     code_name varchar(20),
-    add_sub_store varchar(20),
-    update_date varchar(15),
+    add_sub_store varchar(100),
+    update_date varchar(100),
     primary key (private_name)
 ) character set = utf8;

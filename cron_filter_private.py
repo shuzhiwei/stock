@@ -30,7 +30,9 @@ def requestUrl(url, private_name):
             stock_name = tds[1].get_text().strip()
             duplicate_stock_names.append(stock_name)
 
-    if len(duplicate_stock_names) == 1 or (len(duplicate_stock_names) > 1 and len(set(duplicate_stock_names)) != len(duplicate_stock_names)):
+    if len(duplicate_stock_names) == 1 or (len(duplicate_stock_names) > 1 \
+                and len(set(duplicate_stock_names)) == 1):
+                # and len(set(duplicate_stock_names)) != len(duplicate_stock_names)):
         update_time_list = []
         add_sub_store_list = []
         for tr in trs:
