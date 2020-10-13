@@ -18,11 +18,11 @@ pro = ts.pro_api()
 def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
     try:
         df = pro.daily(ts_code=code, start_date=start_date, end_date=end_date)
-        # print(df)
         if df.empty:
             return
         df['harden_price'] = round(df.pre_close * 1.2, 2)
         df['harden_board'] =  np.where(df.high == df.close, np.where(df.close == df.harden_price, 1, 0), 0)
+        # print(df)
 
         cur_data = df.loc[0]
         cur_flag = df.loc[0].harden_board == 1
@@ -70,25 +70,32 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                     _renShuChange = tds[2].text.strip()
                     tmp_list.append((_date, _renShu, _renShuChange))
                 
-                shareholdersFalling = 0
+                # shareholdersFalling = 0
+                # if tmp_list:
+                #     renShuChange = float(tmp_list[0][1]) - float(tmp_list[-1][1])
+                #     renShuChangeRate = 0
+
+                #     for b in tmp_list:
+                #         logger.debug(b)
+                #         if b[2] and b[2] != '-':
+                #             renShuChangeRate += float(b[2][:-1])
+
+                #     if renShuChange < 0 and renShuChangeRate < 0:
+                #         shareholdersFalling = 1
+
+                shareholdersFallingCount = 0
                 if tmp_list:
-                    renShuChange = float(tmp_list[0][1]) - float(tmp_list[-1][1])
-                    renShuChangeRate = 0
-
-                    for b in tmp_list:
-                        logger.debug(b)
-                        if b[2] and b[2] != '-':
-                            renShuChangeRate += float(b[2][:-1])
-
-                    if renShuChange < 0 and renShuChangeRate < 0:
-                        shareholdersFalling = 1
+                    for tmp in tmp_list:
+                        if tmp[2] != '-' and float(tmp[2][:-1]) < 0:
+                            shareholdersFallingCount += 1
 
                 # 流通市值
                 df = pro.daily_basic(ts_code=code, trade_date=cur_data.trade_date, fields='float_share')
 
-                if shareholdersFalling == 1 and sdluCount >= 6 and df.values[0][0] < 1000000:
-                    stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFalling, sdluCount, float(str(df.values[0][0])))
-                    logger.debug('写入成功')
+                print(cur_data.trade_date, shareholdersFallingCount, sdluCount, df.values[0][0])
+                # if shareholdersFallingCount >= 1 and sdluCount >= 6 and df.values[0][0] < 1000000:
+                stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFallingCount, sdluCount, float(str(df.values[0][0])))
+                logger.debug('写入成功')
     except Exception as e:
         logger.error(e)
         logger.error(traceback.format_exc())
@@ -96,11 +103,11 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
 def cron():
     # 获取当前时间
     end_ts =int(time.time())
-    start_ts = end_ts - 30*24*3600
+    start_ts = end_ts - 60*24*3600
     start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
     end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
     # start_date = '20200901'
-    # end_date = '20201009'
+    end_date = '20201012'
 
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
@@ -108,7 +115,7 @@ def cron():
         datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
         a = 0
         for data in datas.values:
-            # code = '688005.SH'
+            # code = '300050.SZ'
             code = data[0]
             code_name = data[1]
             if a and a % 500 == 0:
