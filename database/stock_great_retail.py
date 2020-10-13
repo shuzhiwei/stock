@@ -37,6 +37,21 @@ def get_all_datas():
         res_list.append(i)
     return res_list
 
+def get_all_datas_on_page(pageSize, pageNo):
+    a = (int(pageNo) - 1) * int(pageSize)
+    sql = 'select * from stock_great_retail order by update_date desc limit ' + str(a) + ', ' + str(pageSize)
+    res = db.query(sql)
+    d_list = []
+    for i in res:
+        d_list.append(i)
+    return d_list
+
+def get_posts_count():
+    sql = 'select count(*) aa from stock_great_retail'
+    res = db.query(sql)
+    value = res[0].aa
+    return value
+
 
 if __name__ == "__main__":
     # insert_code('a', '2020-10-10', 2, 2, 1.999)

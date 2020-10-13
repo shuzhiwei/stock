@@ -71,6 +71,8 @@ class View:
         try:
             web.header("Access-Control-Allow-Origin", "*")
             token = web.input().token
+            pageSize = web.input().pageSize
+            pageNo = web.input().pageNo
             # date_data = web.input().date_data
             # date_ts = int(time.time())
             # date_data = time.strftime('%Y%m%d', time.localtime(date_ts))
@@ -87,7 +89,7 @@ class View:
             sub = username
             act = 'read'
             if e.enforce(sub, dom, obj, act):
-                posts = stock_great_retail.get_all_datas()
+                posts = stock_great_retail.get_all_datas_on_page(pageSize, pageNo)
                 if posts:
                     d_list = []
                     for i in posts:
@@ -99,7 +101,13 @@ class View:
                         d_dict['float_share'] = i.float_share
                         d_dict['name'] = i.name
                         d_list.append(d_dict)
-                    return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
+                    totalCount = stock_great_retail.get_posts_count()
+                    totalPage = int(totalCount / int(pageSize))
+                    totalPage_yu = totalCount % int(pageSize)
+                    if totalPage_yu:
+                        totalPage = totalPage + 1
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': totalCount, 'totalPage': totalPage, 'data': d_list})
+                    # return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
                 else:
                     return json.dumps({'status': 'fail', 'code': 15})
                 # while True:
