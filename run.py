@@ -1,7 +1,7 @@
 import web, json, os
 import configparser
 import traceback
-import jwt, time
+import jwt, time, re
 import casbin, threading
 from collections import OrderedDict
 from logger.logger import logger
@@ -11,7 +11,7 @@ from tools.sync_policy import syncPolicy
 urls = (
     '/view', 'View',
     '/viewPrivate', 'ViewPrivate',
-    '/searchPrivate/(\d+)', 'SearchPrivate',
+    '/searchPrivate', 'SearchPrivate',
 )
 
 app = web.application(urls, globals())
@@ -23,10 +23,11 @@ dom = config.get('acs', 'domain')
 obj = 'stock'
 
 class SearchPrivate:
-    def POST(self, code):
+    def POST(self):
         try:
             web.header("Access-Control-Allow-Origin", "*")
             token = web.input().token
+            stock = web.input().stock
             try:
                 parse_token = jwt.decode(token, 'secret', algorithms='HS256')
             except Exception as e:
@@ -39,15 +40,17 @@ class SearchPrivate:
             sub = username
             act = 'read'
             if e.enforce(sub, dom, obj, act):
-                if 'S' in code:
-                    posts = stock_private.search(code)
-                else:
-
-                    _code = code + '.SZ'
-                    posts = stock_private.search(_code)
-                    if not posts:
-                        _code = code + '.SH'
+                if re.search(r'\d', stock):
+                    if 'S' in stock:
+                        posts = stock_private.search(stock)
+                    else:
+                        _code = stock + '.SZ'
                         posts = stock_private.search(_code)
+                        if not posts:
+                            _code = stock + '.SH'
+                            posts = stock_private.search(_code)
+                else:
+                    posts = stock_private.search_from_name(stock)
 
                 if posts:
                     d_list = []

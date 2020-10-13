@@ -48,6 +48,14 @@ def search(code):
         res_list.append(i)
     return res_list
 
+def search_from_name(name):
+    sql = 'select * from stock_private where code_name="' + name + '"'
+    res = db.query(sql)
+    d_list = []
+    for i in res:
+        d_list.append(i)
+    return d_list
+
 
 if __name__ == "__main__":
-    print(search('002829.SZ'))
+    print(search_from_name('星网宇达'))
