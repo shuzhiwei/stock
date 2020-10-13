@@ -45,7 +45,7 @@ def get_all_datas_on_page(pageSize, pageNo):
     return d_list
 
 def get_posts_count():
-    sql = 'select count(*) aa from stock_private'
+    sql = 'select count(*) aa from stock_private1'
     res = db.query(sql)
     value = res[0].aa
     return value
