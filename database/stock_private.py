@@ -49,7 +49,7 @@ def search(code):
     return res_list
 
 def search_from_name(name):
-    sql = 'select * from stock_private where code_name="' + name + '"'
+    sql = 'select * from stock_private where code_name like "%' + name + '%"'
     res = db.query(sql)
     d_list = []
     for i in res:
@@ -58,4 +58,4 @@ def search_from_name(name):
 
 
 if __name__ == "__main__":
-    print(search_from_name('星网宇达'))
+    print(search_from_name('星网'))
