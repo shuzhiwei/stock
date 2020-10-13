@@ -5,11 +5,12 @@ import jwt, time
 import casbin, threading
 from collections import OrderedDict
 from logger.logger import logger
-from database import stock_great_retail
+from database import stock_great_retail, stock_private
 from tools.sync_policy import syncPolicy
 
 urls = (
     '/view', 'View',
+    '/viewPrivate', 'ViewPrivate',
 )
 
 app = web.application(urls, globals())
@@ -19,6 +20,44 @@ full_path = parent_dir + '/confs/config.ini'
 config.read(full_path)
 dom = config.get('acs', 'domain')
 obj = 'stock'
+
+class ViewPrivate:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_private.get_all_datas()
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['code'] = i.code
+                        d_dict['update_date'] = i.update_date
+                        d_dict['private_name'] = i.private_name
+                        d_dict['add_sub_store'] = i.add_sub_store
+                        d_dict['code_name'] = i.code_name
+                        d_list.append(d_dict)
+                    return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
 
 class View:
     def POST(self):
