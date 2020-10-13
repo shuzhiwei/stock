@@ -41,5 +41,13 @@ def get_posts_count():
     value = res[0].aa
     return value
 
+def search(code):
+    res = db.select('stock_private', where="code=$code", vars=locals())
+    res_list = []
+    for i in res:
+        res_list.append(i)
+    return res_list
+
+
 if __name__ == "__main__":
-    print(get_all_datas())
+    print(search('002829.SZ'))
