@@ -50,5 +50,13 @@ def get_posts_count():
     value = res[0].aa
     return value
 
+def search_from_name(name):
+    sql = 'select * from stock_private1 where private_name like "%' + name + '%"'
+    res = db.query(sql)
+    d_list = []
+    for i in res:
+        d_list.append(i)
+    return d_list
+
 if __name__ == "__main__":
     print(existData('深圳市和沣资产管理有限公司-和沣共赢私募证券投资基金'))
