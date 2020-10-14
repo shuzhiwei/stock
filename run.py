@@ -54,6 +54,7 @@ class SearchPrivate1:
                         d_dict['code_name'] = i.code_name
                         d_dict['add_sub_store'] = i.add_sub_store
                         d_dict['update_date'] = i.update_date
+                        d_dict['type'] = i.type
                         d_list.append(d_dict)
                     return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
                 else:
