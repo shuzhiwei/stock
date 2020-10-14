@@ -146,7 +146,7 @@ class ViewPrivate1Favorites:
                         d_dict['update_date'] = i.update_date
                         d_dict['type'] = i.type
                         d_list.append(d_dict)
-                    totalCount = stock_private1.get_posts_count()
+                    totalCount = stock_private1.get_posts_count_on_favorites()
                     totalPage = int(totalCount / int(pageSize))
                     totalPage_yu = totalCount % int(pageSize)
                     if totalPage_yu:

@@ -63,6 +63,12 @@ def get_posts_count():
     value = res[0].aa
     return value
 
+def get_posts_count_on_favorites():
+    sql = 'select count(*) aa from stock_private1 where type=1'
+    res = db.query(sql)
+    value = res[0].aa
+    return value
+
 def search_from_name(name):
     sql = 'select * from stock_private1 where private_name like "%' + name + '%"'
     res = db.query(sql)
