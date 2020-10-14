@@ -37,12 +37,25 @@ def updateData(private_name, code_name, add_sub_store, update_date):
 
 def get_all_datas_on_page(pageSize, pageNo):
     a = (int(pageNo) - 1) * int(pageSize)
-    sql = 'select * from stock_private1 limit ' + str(a) + ', ' + str(pageSize)
+    sql = 'select * from stock_private1 where type=0 limit ' + str(a) + ', ' + str(pageSize)
     res = db.query(sql)
     d_list = []
     for i in res:
         d_list.append(i)
     return d_list
+
+def get_all_datas_on_page_on_favorites(pageSize, pageNo):
+    a = (int(pageNo) - 1) * int(pageSize)
+    sql = 'select * from stock_private1 where type=1 limit ' + str(a) + ', ' + str(pageSize)
+    res = db.query(sql)
+    d_list = []
+    for i in res:
+        d_list.append(i)
+    return d_list
+
+def update_favorites(private_name, _type):
+    sql = 'update stock_private1 set type=' + str(_type) + ' where private_name="' + private_name + '"'
+    db.query(sql)
 
 def get_posts_count():
     sql = 'select count(*) aa from stock_private1'

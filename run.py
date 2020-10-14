@@ -14,6 +14,8 @@ urls = (
     '/searchPrivate', 'SearchPrivate',
     '/viewPrivate1', 'ViewPrivate1',
     '/searchPrivate1', 'SearchPrivate1',
+    '/viewPrivate1Favorites', 'ViewPrivate1Favorites',
+    '/updatePrivate1Favorites', 'UpdatePrivate1Favorites'
 )
 
 app = web.application(urls, globals())
@@ -106,6 +108,79 @@ class SearchPrivate:
                     return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
                 else:
                     return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
+
+class ViewPrivate1Favorites:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            pageSize = web.input().pageSize
+            pageNo = web.input().pageNo
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_private1.get_all_datas_on_page_on_favorites(pageSize, pageNo)
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['private_name'] = i.private_name
+                        d_dict['code_name'] = i.code_name
+                        d_dict['add_sub_store'] = i.add_sub_store
+                        d_dict['update_date'] = i.update_date
+                        d_dict['type'] = i.type
+                        d_list.append(d_dict)
+                    totalCount = stock_private1.get_posts_count()
+                    totalPage = int(totalCount / int(pageSize))
+                    totalPage_yu = totalCount % int(pageSize)
+                    if totalPage_yu:
+                        totalPage = totalPage + 1
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': totalCount, 'totalPage': totalPage, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
+
+class UpdatePrivate1Favorites:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            private_name = web.input().private_name
+            _type = web.input().type
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                stock_private1.update_favorites(private_name, _type)
+                return json.dumps({'status': 'success', 'code': 200})
             else:
                 return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
         except Exception as e:
