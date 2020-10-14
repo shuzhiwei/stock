@@ -6,6 +6,7 @@ import tushare as ts
 from bs4 import BeautifulSoup
 from database import stock_great_retail
 from logger.logger import logger
+from tools import sample_mail
 
 token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 # token = '17d03acaa0df711791055c4dfe59020cc8698598d9f8e54ee87e7a3a'
@@ -14,6 +15,7 @@ token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 # token = '192cc8bf918fc206e143c5484b43bd668e69a84484d917387b658745'
 ts.set_token(token)
 pro = ts.pro_api()
+great_stock_count = 0
 
 def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
     try:
@@ -22,7 +24,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
             return
         df['harden_price'] = round(df.pre_close * 1.2, 2)
         df['harden_board'] =  np.where(df.high == df.close, np.where(df.close == df.harden_price, 1, 0), 0)
-        # print(df)
+        print(len(df))
 
         cur_data = df.loc[0]
         cur_flag = df.loc[0].harden_board == 1
@@ -96,6 +98,10 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                 # if shareholdersFallingCount >= 1 and sdluCount >= 6 and df.values[0][0] < 1000000:
                 stock_great_retail.insert_code(code, code_name, cur_data.trade_date, shareholdersFallingCount, sdluCount, float(str(df.values[0][0])))
                 logger.debug('写入成功')
+                global great_stock_count
+                if shareholdersFallingCount and sdluCount >=6 and float(str(df.values[0][0])) < 1000000:
+                    great_stock_count += 1 
+
     except Exception as e:
         logger.error(e)
         logger.error(traceback.format_exc())
@@ -107,7 +113,8 @@ def cron():
     start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
     end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
     # start_date = '20200901'
-    end_date = '20201012'
+    # end_date = '20201012'
+    print(start_date, end_date)
 
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
     is_open = is_open.values[0][2]
@@ -118,6 +125,7 @@ def cron():
             # code = '300050.SZ'
             code = data[0]
             code_name = data[1]
+            print(code, code_name)
             if a and a % 500 == 0:
                 print('开始睡眠1min...')
                 time.sleep(60)
@@ -128,4 +136,9 @@ def cron():
 
 if __name__ == "__main__":
     cron()
+    if great_stock_count:
+        sample_mail.send_mail('灵犀系统为您分析出了' + str(great_stock_count) + \
+                              '支妖股，详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
+    else:
+        sample_mail.send_mail('今日未删选出妖股！')
         
