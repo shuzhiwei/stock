@@ -7,7 +7,8 @@ import subprocess
 host_server = 'smtp.163.com'
 sender = 'aqszw818@163.com'
 pwd = 'CHJGUPTKYVJCCDCD'
-receiver = '1065537421@qq.com'
+receiver = ['1065537421@qq.com',]
+# receiver = '1326551344@qq.com'
 mail_title = '灵犀系统'
 
 def send_mail(mail_content):
@@ -20,7 +21,7 @@ def send_mail(mail_content):
     msg = MIMEText(mail_content, "plain", 'utf-8')
     msg["Subject"] = Header(mail_title, 'utf-8')
     msg["From"] = sender
-    msg["To"] = receiver
+    msg["To"] = ','.join(receiver)
     try:
         smtp.sendmail(sender, receiver, msg.as_string())
     except Exception:
@@ -36,5 +37,5 @@ if __name__ == "__main__":
     #    mail_content = 'execute success!'
     #else:
     #    mail_content = 'execute fail!!!!'
-    mail_content = 'szw-aliyun phah3Aim6sahNg'
+    mail_content = 'hello'
     send_mail(mail_content)
