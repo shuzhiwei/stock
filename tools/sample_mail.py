@@ -7,7 +7,7 @@ import subprocess
 host_server = 'smtp.163.com'
 sender = 'aqszw818@163.com'
 pwd = 'CHJGUPTKYVJCCDCD'
-receiver = ['1065537421@qq.com',]
+receiver = ['1065537421@qq.com', '1326551344@qq.com']
 # receiver = '1326551344@qq.com'
 mail_title = '灵犀系统'
 

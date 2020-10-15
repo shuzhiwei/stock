@@ -138,7 +138,7 @@ if __name__ == "__main__":
     cron()
     if great_stock_count:
         sample_mail.send_mail('灵犀系统为您分析出了' + str(great_stock_count) + \
-                              '支妖股，详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
+                              '支妖股！详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
     else:
-        sample_mail.send_mail('今日未筛选出妖股！')
+        sample_mail.send_mail('今日未筛选出妖股！详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
         
