@@ -36,7 +36,7 @@ def get_all_private_names():
 
 def get_all_datas_on_page(pageSize, pageNo):
     a = (int(pageNo) - 1) * int(pageSize)
-    sql = 'select * from stock_private order by update_date desc limit ' + str(a) + ', ' + str(pageSize)
+    sql = 'select * from stock_private order by update_date desc ,code asc limit ' + str(a) + ', ' + str(pageSize)
     res = db.query(sql)
     d_list = []
     for i in res:

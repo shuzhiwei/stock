@@ -38,7 +38,8 @@ def get_all_datas():
 
 def get_all_datas_on_page(pageSize, pageNo):
     a = (int(pageNo) - 1) * int(pageSize)
-    sql = 'select * from stock_kdj order by update_date desc limit ' + str(a) + ', ' + str(pageSize)
+    # sql = 'select * from stock_kdj order by update_date desc limit ' + str(a) + ', ' + str(pageSize)
+    sql = 'select * from stock_kdj order by update_date desc, id asc limit ' + str(pageSize) + ' OFFSET ' + str(a)
     res = db.query(sql)
     d_list = []
     for i in res:
@@ -56,4 +57,4 @@ def delete_code(id):
 
 
 if __name__ == "__main__":
-    delete_code(3)
+    print(get_all_datas_on_page(8, 2))
