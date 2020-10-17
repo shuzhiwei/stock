@@ -58,6 +58,9 @@ class ViewKdj:
                         d_dict['shareholder_falling_count'] = i.shareholder_falling_count
                         d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
                         d_dict['float_share'] = i.float_share
+                        d_dict['macd_gold_cross'] = i.macd_gold_cross
+                        d_dict['macd_dif'] = i.macd_dif
+                        d_dict['macd_dea'] = i.macd_dea
                         d_list.append(d_dict)
                     totalCount = stock_kdj.get_posts_count()
                     totalPage = int(totalCount / int(pageSize))

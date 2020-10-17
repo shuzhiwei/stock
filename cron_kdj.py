@@ -3,6 +3,7 @@ import traceback
 import pandas as pd
 import numpy as np
 import tushare as ts
+import talib as ta
 from bs4 import BeautifulSoup
 from database import stock_kdj
 from logger.logger import logger
@@ -16,10 +17,37 @@ token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 ts.set_token(token)
 pro = ts.pro_api()
 
+def calculateEMA(period, closeArray, emaArray=[]):
+    length = len(closeArray)
+    nanCounter = np.count_nonzero(np.isnan(closeArray))
+    if not emaArray:
+        emaArray.extend(np.tile([np.nan], (nanCounter + period - 1)))
+        firstema = np.mean(closeArray[nanCounter:nanCounter + period - 1])
+        emaArray.append(firstema)
+        for i in range(nanCounter + period, length):
+            ema = (2 * closeArray[i] + (period - 1) * emaArray[-1]) / (period + 1)
+            emaArray.append(ema)
+    return np.array(emaArray)
+
+
+def calculateMACD(closeArray, shortPeriod=12, longPeriod=26, signalPeriod=9):
+    ema12 = calculateEMA(shortPeriod, closeArray, [])
+    ema26 = calculateEMA(longPeriod, closeArray, [])
+    diff = ema12 - ema26
+
+    dea = calculateEMA(signalPeriod, diff, [])
+    macd = (diff - dea)
+    fast_values = diff
+    slow_values = dea
+    diff_values = macd
+
+    return fast_values, slow_values, diff_values
+
 def cal_kdj(pro, code, start_date, end_date, code_name):
     try:
         df = pro.daily(ts_code=code, start_date=start_date, end_date=end_date)
         df.sort_values('trade_date', inplace=True)
+        # print(df)
         
         low_list = df['low'].rolling(9, min_periods=9).min()
         low_list.fillna(value = df['low'].expanding().min(), inplace = True)
@@ -81,19 +109,6 @@ def cal_kdj(pro, code, start_date, end_date, code_name):
                 _renShuChange = tds[2].text.strip()
                 tmp_list.append((_date, _renShu, _renShuChange))
             
-            # shareholdersFalling = 0
-            # if tmp_list:
-            #     renShuChange = float(tmp_list[0][1]) - float(tmp_list[-1][1])
-            #     renShuChangeRate = 0
-
-            #     for b in tmp_list:
-            #         logger.debug(b)
-            #         if b[2] and b[2] != '-':
-            #             renShuChangeRate += float(b[2][:-1])
-
-            #     if renShuChange < 0 and renShuChangeRate < 0:
-            #         shareholdersFalling = 1
-
             shareholdersFallingCount = 0
             if tmp_list:
                 for tmp in tmp_list:
@@ -103,13 +118,30 @@ def cal_kdj(pro, code, start_date, end_date, code_name):
             # 流通市值
             df1 = pro.daily_basic(ts_code=code, trade_date=df.iloc[-1]['trade_date'], fields='float_share')
 
-            # global great_stock_count
-            # if shareholdersFallingCount and sdluCount >=6 and float(str(df.values[0][0])) < 1000000:
-            #     great_stock_count += 1 
+            if sdluCount >= 6 and shareholdersFallingCount and  float(str(df1.values[0][0])) < 1000000:
+                # 计算macd
+                # dif, dea, macd = calculateMACD(df.close, shortPeriod=12, longPeriod=26, signalPeriod=9)
+                dif, dea, hist = ta.MACD(df['close'].astype(float).values, fastperiod=12, slowperiod=26, signalperiod=9)
+                df2 = pd.DataFrame({'dif':dif[33:],'dea':dea[33:],'hist':hist[33:]},
+                                    index=df['trade_date'][33:],columns=['dif','dea','hist'])
 
-            stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 1, shareholdersFallingCount, sdluCount, float(str(df1.values[0][0])))
-        # elif '死叉' == df.iloc[-1]['KDJ_金叉死叉']:
-        #     stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 2)
+                df2['macd_金叉死叉'] = ''
+                macd_position=df2['dif']>df2['dea']
+                df2.loc[macd_position[(macd_position == True) & (macd_position.shift() == False)].index, 'macd_金叉死叉'] = '金叉'
+                df2.loc[macd_position[(macd_position == False) & (macd_position.shift() == True)].index, 'macd_金叉死叉'] = '死叉'
+
+                macd_dif = df2.iloc[-1].dif
+                macd_dea = df2.iloc[-1].dea
+                if '金叉' == df2.iloc[-1]['macd_金叉死叉']:
+                    # 入库
+                    stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 1,
+                                          shareholdersFallingCount, sdluCount,
+                                          float(str(df1.values[0][0])), 1, macd_dif, macd_dea)
+                elif macd_dif and macd_dea:
+                    stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 1,
+                                          shareholdersFallingCount, sdluCount,
+                                          float(str(df1.values[0][0])), 0, macd_dif, macd_dea)
+
 
     except Exception as e:
         logger.error(e)
@@ -131,7 +163,7 @@ def cron():
         datas = pro.stock_basic(exchange='', list_status='L', fields='ts_code,name')
         a = 0
         for data in datas.values:
-            # code = '300050.SZ'
+            # code = '300117.SZ'
             code = data[0]
             code_name = data[1]
             print(code, code_name)

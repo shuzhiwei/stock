@@ -33,9 +33,12 @@ CREATE TABLE stock_kdj (
     shareholder_falling_count INT(2),
     sdlu_great_retail_count INT(2),
     float_share FLOAT(10, 2),
+    macd_gold_cross INT(5) default 0,
+    macd_dif FLOAT(10, 2),
+    macd_dea FLOAT(10, 2),
     primary key (id)
 ) character set = utf8;
 
-drop table stock_kdj;
-
  //金叉是1，死叉是2，无是0
+
+ drop table stock_kdj;

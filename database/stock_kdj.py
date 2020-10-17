@@ -17,10 +17,13 @@ password = config.get('mysql', 'password')
 db = web.database(dbn='mysql',host=host, port=port, user=user, pw=password, db=db)
 
 
-def insert_code(code, code_name, update_date, if_gold_cross, shareholdersFallingCount, sdluCount, float_share):
+def insert_code(code, code_name, update_date, if_gold_cross, shareholdersFallingCount, 
+                sdluCount, float_share, macd_gold_cross, macd_dif, macd_dea):
+
     db.insert('stock_kdj', code=code, code_name=code_name, update_date=update_date,
                if_gold_cross=if_gold_cross, shareholder_falling_count=shareholdersFallingCount,
-               sdlu_great_retail_count=sdluCount, float_share=float_share)
+               sdlu_great_retail_count=sdluCount, float_share=float_share, 
+               macd_gold_cross=macd_gold_cross, macd_dif=macd_dif, macd_dea=macd_dea)
 
 def get_datas(date_data):
     res = db.select('stock_kdj', where='update_date=$date_data', vars=locals())
