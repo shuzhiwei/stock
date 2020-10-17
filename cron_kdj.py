@@ -137,7 +137,7 @@ def cal_kdj(pro, code, start_date, end_date, code_name):
                     stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 1,
                                           shareholdersFallingCount, sdluCount,
                                           float(str(df1.values[0][0])), 1, macd_dif, macd_dea)
-                elif macd_dif and macd_dea:
+                elif macd_dif > 0 and macd_dea > 0:
                     stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 1,
                                           shareholdersFallingCount, sdluCount,
                                           float(str(df1.values[0][0])), 0, macd_dif, macd_dea)
