@@ -23,3 +23,19 @@ CREATE TABLE stock_private1 (
     update_date varchar(100),
     primary key (private_name)
 ) character set = utf8;
+
+CREATE TABLE stock_kdj (
+    id INT AUTO_INCREMENT,
+    code varchar(100),
+    code_name varchar(20),
+    update_date varchar(100),
+    if_gold_cross INT(5) default 0,
+    shareholder_falling_count INT(2),
+    sdlu_great_retail_count INT(2),
+    float_share FLOAT(10, 2),
+    primary key (id)
+) character set = utf8;
+
+drop table stock_kdj;
+
+ //金叉是1，死叉是2，无是0

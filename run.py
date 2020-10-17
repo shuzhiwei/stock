@@ -5,7 +5,7 @@ import jwt, time, re
 import casbin, threading
 from collections import OrderedDict
 from logger.logger import logger
-from database import stock_great_retail, stock_private, stock_private1
+from database import stock_great_retail, stock_private, stock_private1, stock_kdj
 from tools.sync_policy import syncPolicy
 
 urls = (
@@ -16,6 +16,7 @@ urls = (
     '/searchPrivate1', 'SearchPrivate1',
     '/viewPrivate1Favorites', 'ViewPrivate1Favorites',
     '/updatePrivate1Favorites', 'UpdatePrivate1Favorites'
+    '/viewKdj', 'ViewKdj',
 )
 
 app = web.application(urls, globals())
@@ -25,6 +26,54 @@ full_path = parent_dir + '/confs/config.ini'
 config.read(full_path)
 dom = config.get('acs', 'domain')
 obj = 'stock'
+
+class ViewKdj:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            pageSize = web.input().pageSize
+            pageNo = web.input().pageNo
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_kdj.get_all_datas_on_page(pageSize, pageNo)
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['code'] = i.code
+                        d_dict['code_name'] = i.code_name
+                        d_dict['update_date'] = i.update_date
+                        d_dict['if_gold_cross'] = i.if_gold_cross
+                        d_dict['shareholder_falling_count'] = i.shareholder_falling_count
+                        d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
+                        d_dict['float_share'] = i.float_share
+                        d_list.append(d_dict)
+                    totalCount = stock_kdj.get_posts_count()
+                    totalPage = int(totalCount / int(pageSize))
+                    totalPage_yu = totalCount % int(pageSize)
+                    if totalPage_yu:
+                        totalPage = totalPage + 1
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': totalCount, 'totalPage': totalPage, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
+
 
 class SearchPrivate1:
     def POST(self):
