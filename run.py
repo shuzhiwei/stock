@@ -15,7 +15,7 @@ urls = (
     '/viewPrivate1', 'ViewPrivate1',
     '/searchPrivate1', 'SearchPrivate1',
     '/viewPrivate1Favorites', 'ViewPrivate1Favorites',
-    '/updatePrivate1Favorites', 'UpdatePrivate1Favorites'
+    '/updatePrivate1Favorites', 'UpdatePrivate1Favorites',
     '/viewKdj', 'ViewKdj',
 )
 
