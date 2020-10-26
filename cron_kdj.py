@@ -144,7 +144,7 @@ def cal_kdj(pro, code, start_date, end_date, code_name):
                         # 入库
                         stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 0,
                                             shareholdersFallingCount, sdluCount,
-                                            float(str(df1.values[0][0])), 1, macd_dif, macd_dea)
+                                            float(str(df1.values[0][0])), 1, float(str(macd_dif)), float(str(macd_dea)))
 
 
     except Exception as e:
