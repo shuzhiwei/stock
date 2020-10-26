@@ -142,7 +142,7 @@ def cal_kdj(pro, code, start_date, end_date, code_name):
                         #                         float(str(df1.values[0][0])), 0, macd_dif, macd_dea)
 
                         # 入库
-                        stock_kdj.insert_code(code, code_name, df.iloc[0]['trade_date'], 0,
+                        stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 0,
                                             shareholdersFallingCount, sdluCount,
                                             float(str(df1.values[0][0])), 1, macd_dif, macd_dea)
 
@@ -158,7 +158,7 @@ def cron():
     start_date = time.strftime('%Y%m%d', time.localtime(start_ts))
     end_date = time.strftime('%Y%m%d', time.localtime(end_ts))
     # start_date = '20200901'
-    end_date = '20201016'
+    # end_date = '20201016'
     print(start_date, end_date)
 
     is_open = pro.trade_cal(exchange='', start_date=end_date, end_date=end_date)
