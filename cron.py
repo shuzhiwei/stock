@@ -16,6 +16,7 @@ token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 ts.set_token(token)
 pro = ts.pro_api()
 great_stock_list = []
+flag1 = 1
 
 def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
     try:
@@ -132,6 +133,9 @@ def cron():
             ifFirstHardenBoard(pro, code, start_date, end_date, code_name)
             a += 1
             # break
+    else:
+        global flag1
+        flag1 = -1
 
 
 if __name__ == "__main__":
@@ -141,6 +145,8 @@ if __name__ == "__main__":
         sample_mail.send_mail('灵犀系统为您分析出了' + str(len(great_stock_list)) + \
                               '支妖股: ' + strGreatStock + ' ！详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
     else:
-        sample_mail.send_mail('今日未筛选出妖股！详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
+        if flag1 == 1:
+            sample_mail.send_mail('今日未筛选出妖股！详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
+            
 
         
