@@ -101,7 +101,7 @@ def ifFirstHardenBoard(pro, code, start_date, end_date, code_name):
                 logger.debug('写入成功')
                 global great_stock_list
                 if shareholdersFallingCount and sdluCount >=6 and float(str(df.values[0][0])) < 1000000:
-                    great_stock_list.append(code_name)
+                    great_stock_list.append((code, code_name))
 
     except Exception as e:
         logger.error(e)
@@ -141,7 +141,13 @@ def cron():
 if __name__ == "__main__":
     cron()
     if great_stock_list:
-        strGreatStock = ', '.join(great_stock_list)
+        strMsg = []
+        for i in great_stock_list:
+            code = i[0]
+            code_name = i[1]
+            strMsg.append(code_name + '(' + code.split('.')[0] + ')')
+
+        strGreatStock = ', '.join(strMsg)
         sample_mail.send_mail('灵犀系统为您分析出了' + str(len(great_stock_list)) + \
                               '支妖股: ' + strGreatStock + ' ！详情请登陆灵犀系统。https://www.食.tech/lingxi-system/')
     else:
