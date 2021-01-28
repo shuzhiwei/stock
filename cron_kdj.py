@@ -16,6 +16,7 @@ token = '4158b7cdca566e01b4397a1f3328717043572b65cb5d7ef5bb04678e'
 # token = '192cc8bf918fc206e143c5484b43bd668e69a84484d917387b658745'
 ts.set_token(token)
 pro = ts.pro_api()
+gold_cross_lists = []
 
 def cal_kdj(pro, code, start_date, end_date, code_name):
     try:
@@ -145,6 +146,8 @@ def cal_kdj(pro, code, start_date, end_date, code_name):
                         stock_kdj.insert_code(code, code_name, df.iloc[-1]['trade_date'], 0,
                                             shareholdersFallingCount, sdluCount,
                                             float(str(df1.values[0][0])), 1, float(str(macd_dif)), float(str(macd_dea)))
+                        global gold_cross_lists
+                        gold_cross_lists.append((code, code_name))
 
 
     except Exception as e:
@@ -181,5 +184,15 @@ def cron():
 
 if __name__ == "__main__":
     cron()
+    if gold_cross_lists:
+        strMsg = []
+        for i in gold_cross_lists:
+            code = i[0]
+            code_name = i[1]
+            strMsg.append(code_name + '(' + code.split('.')[0] + ')')
+
+        gold_cross = ', '.join(strMsg)
+        sample_mail.send_mail('灵犀系统为您分析出了' + str(len(gold_cross_lists)) + \
+                              '支金叉: ' + gold_cross + ' ！详情请登陆灵犀系统。https://www.nnbkqnp.cn/lingxi-system/')
 
         
