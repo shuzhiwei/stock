@@ -306,7 +306,7 @@ class ViewPrivate1:
             sub = username
             act = 'read'
             if e.enforce(sub, dom, obj, act):
-                posts = stock_private1.get_one_datas(private_name)
+                posts = stock_private1.get_one_data(private_name)
                 if posts:
                     d_list = []
                     for i in posts:
@@ -419,7 +419,7 @@ class ViewPrivateOne:
             web.header("Access-Control-Allow-Origin", "*")
             token = web.input().token
             code = web.input().code
-            code_name = web.input().code_name
+            update_date = web.input().update_date
             try:
                 parse_token = jwt.decode(token, 'secret', algorithms='HS256')
             except Exception as e:
@@ -432,7 +432,7 @@ class ViewPrivateOne:
             sub = username
             act = 'read'
             if e.enforce(sub, dom, obj, act):
-                posts = stock_private.get_one_datas(code, code_name)
+                posts = stock_private.get_one_data(code, update_date)
                 if posts:
                     d_list = []
                     for i in posts:
