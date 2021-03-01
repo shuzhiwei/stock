@@ -488,7 +488,7 @@ class View:
                         d_dict['shareholder_falling_count'] = i.shareholder_falling_count
                         d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
                         d_dict['float_share'] = i.float_share
-                        d_dict['name'] = i.name
+                        d_dict['name'] = i.code_name
                         d_list.append(d_dict)
                     totalCount = stock_great_retail.get_posts_count()
                     totalPage = int(totalCount / int(pageSize))
@@ -555,7 +555,7 @@ class ViewOne:
                         d_dict['shareholder_falling_count'] = i.shareholder_falling_count
                         d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
                         d_dict['float_share'] = i.float_share
-                        d_dict['name'] = i.name
+                        d_dict['name'] = i.code_name
                         d_dict['create_date'] = i.create_date
                         d_dict['html_path'] = i.html_path
                         d_list.append(d_dict)
