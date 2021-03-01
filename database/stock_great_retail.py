@@ -1,6 +1,6 @@
 import web, datetime
 import configparser
-import os, sys
+import os, sys, time
 
 # 解析配置
 parent_dir = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
@@ -18,7 +18,8 @@ db = web.database(dbn='mysql',host=host, port=port, user=user, pw=password, db=d
 
 
 def insert_code(code, name, update_date, shareholder_falling_count, sdlu_great_retail_count, float_share):
-    db.insert('stock_great_retail', code=code, name=name, update_date=update_date, shareholder_falling_count=shareholder_falling_count, sdlu_great_retail_count=sdlu_great_retail_count, float_share=float_share)
+    create_date = str(int(time.time() * 1000))
+    db.insert('stock_great_retail', code=code, name=name, update_date=update_date, shareholder_falling_count=shareholder_falling_count, sdlu_great_retail_count=sdlu_great_retail_count, float_share=float_share, create_date=create_date)
 
 def delete_code(code, update_date):
     db.delete('stock_great_retail', where="id=$id", vars=locals())

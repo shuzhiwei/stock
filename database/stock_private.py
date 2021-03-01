@@ -1,6 +1,6 @@
 import web, datetime
 import configparser
-import os, sys
+import os, sys, time
 
 # 解析配置
 parent_dir = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
@@ -17,7 +17,8 @@ password = config.get('mysql', 'password')
 db = web.database(dbn='mysql',host=host, port=port, user=user, pw=password, db=db)
 
 def insert_code(code, code_name, update_date, private_name, add_sub_store):
-    db.insert('stock_private', code=code, code_name=code_name, update_date=update_date, private_name=private_name, add_sub_store=add_sub_store)
+    create_date = str(int(time.time() * 1000))
+    db.insert('stock_private', code=code, code_name=code_name, update_date=update_date, private_name=private_name, add_sub_store=add_sub_store, create_date=create_date)
 
 def get_all_datas():
     res = db.select('stock_private', order="update_date desc")
