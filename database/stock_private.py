@@ -44,6 +44,14 @@ def get_all_datas_on_page(pageSize, pageNo):
         d_list.append(i)
     return d_list
 
+def get_one_data(code, update_date):
+    sql = 'select * from stock_private where code="' + code + '" and update_date="' + update_date + '"'
+    res = db.query(sql)
+    d_list = []
+    for i in res:
+        d_list.append(i)
+    return d_list
+
 def get_posts_count():
     sql = 'select count(*) aa from stock_private'
     res = db.query(sql)

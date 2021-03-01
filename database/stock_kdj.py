@@ -39,6 +39,13 @@ def get_all_datas():
         res_list.append(i)
     return res_list
 
+def get_one_data(id):
+    res = db.select('stock_kdj', where="id=$id", vars=locals())
+    res_list = []
+    for i in res:
+        res_list.append(i)
+    return res_list
+
 def get_all_datas_on_page(pageSize, pageNo):
     a = (int(pageNo) - 1) * int(pageSize)
     # sql = 'select * from stock_kdj order by update_date desc limit ' + str(a) + ', ' + str(pageSize)

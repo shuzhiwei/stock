@@ -45,6 +45,14 @@ def get_all_datas_on_page(pageSize, pageNo):
         d_list.append(i)
     return d_list
 
+def get_one_data(private_name):
+    sql = 'select * from stock_private1 where private_name="' + private_name + '"'
+    res = db.query(sql)
+    d_list = []
+    for i in res:
+        d_list.append(i)
+    return d_list
+
 def get_all_datas_on_page_on_favorites(pageSize, pageNo):
     a = (int(pageNo) - 1) * int(pageSize)
     sql = 'select * from stock_private1 where type=1 limit ' + str(a) + ', ' + str(pageSize)

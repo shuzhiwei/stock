@@ -10,13 +10,17 @@ from tools.sync_policy import syncPolicy
 
 urls = (
     '/view', 'View',
+    '/viewOne', 'ViewOne',
     '/viewPrivate', 'ViewPrivate',
+    '/viewPrivateOne', 'ViewPrivateOne',
     '/searchPrivate', 'SearchPrivate',
     '/viewPrivate1', 'ViewPrivate1',
+    '/viewPrivate1One', 'ViewPrivate1One',
     '/searchPrivate1', 'SearchPrivate1',
     '/viewPrivate1Favorites', 'ViewPrivate1Favorites',
     '/updatePrivate1Favorites', 'UpdatePrivate1Favorites',
     '/viewKdj', 'ViewKdj',
+    '/viewKdj/(\d+)', 'ViewKdjOne',
 )
 
 app = web.application(urls, globals())
@@ -77,6 +81,50 @@ class ViewKdj:
             logger.error(traceback.format_exc())
             return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
 
+class ViewKdjOne:
+    def POST(self, id):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_kdj.get_one_data(id)
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['code'] = i.code
+                        d_dict['code_name'] = i.code_name
+                        d_dict['update_date'] = i.update_date
+                        d_dict['if_gold_cross'] = i.if_gold_cross
+                        d_dict['shareholder_falling_count'] = i.shareholder_falling_count
+                        d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
+                        d_dict['float_share'] = i.float_share
+                        d_dict['macd_gold_cross'] = i.macd_gold_cross
+                        d_dict['macd_dif'] = i.macd_dif
+                        d_dict['macd_dea'] = i.macd_dea
+                        d_dict['create_date'] = i.create_date
+                        d_dict['html_path'] = i.html_path
+                        d_list.append(d_dict)
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': 1, 'totalPage': 1, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
 
 class SearchPrivate1:
     def POST(self):
@@ -242,12 +290,10 @@ class UpdatePrivate1Favorites:
             return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
 
 class ViewPrivate1:
-    def POST(self):
+    def POST(self, private_name):
         try:
             web.header("Access-Control-Allow-Origin", "*")
             token = web.input().token
-            pageSize = web.input().pageSize
-            pageNo = web.input().pageNo
             try:
                 parse_token = jwt.decode(token, 'secret', algorithms='HS256')
             except Exception as e:
@@ -260,7 +306,7 @@ class ViewPrivate1:
             sub = username
             act = 'read'
             if e.enforce(sub, dom, obj, act):
-                posts = stock_private1.get_all_datas_on_page(pageSize, pageNo)
+                posts = stock_private1.get_one_datas(private_name)
                 if posts:
                     d_list = []
                     for i in posts:
@@ -269,13 +315,50 @@ class ViewPrivate1:
                         d_dict['code_name'] = i.code_name
                         d_dict['add_sub_store'] = i.add_sub_store
                         d_dict['update_date'] = i.update_date
+                        d_dict['create_date'] = i.create_date
+                        d_dict['html_path'] = i.html_path
                         d_list.append(d_dict)
-                    totalCount = stock_private1.get_posts_count()
-                    totalPage = int(totalCount / int(pageSize))
-                    totalPage_yu = totalCount % int(pageSize)
-                    if totalPage_yu:
-                        totalPage = totalPage + 1
-                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': totalCount, 'totalPage': totalPage, 'data': d_list})
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': 1, 'totalPage': 1, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
+
+class ViewPrivate1One:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            private_name = web.input().private_name
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_private1.get_one_data(private_name)
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['private_name'] = i.private_name
+                        d_dict['code_name'] = i.code_name
+                        d_dict['add_sub_store'] = i.add_sub_store
+                        d_dict['update_date'] = i.update_date
+                        d_dict['create_date'] = i.create_date
+                        d_dict['html_path'] = i.html_path
+                        d_list.append(d_dict)
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': 1, 'totalPage': 1, 'data': d_list})
                 else:
                     return json.dumps({'status': 'fail', 'code': 15})
             else:
@@ -330,6 +413,48 @@ class ViewPrivate:
             logger.error(traceback.format_exc())
             return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
 
+class ViewPrivateOne:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            code = web.input().code
+            code_name = web.input().code_name
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_private.get_one_datas(code, code_name)
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['code'] = i.code
+                        d_dict['update_date'] = i.update_date
+                        d_dict['private_name'] = i.private_name
+                        d_dict['add_sub_store'] = i.add_sub_store
+                        d_dict['code_name'] = i.code_name
+                        d_dict['create_date'] = i.create_date
+                        d_dict['html_path'] = i.html_path
+                        d_list.append(d_dict)
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': 1, 'totalPage': 1, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
+
 class View:
     def POST(self):
         try:
@@ -371,6 +496,70 @@ class View:
                     if totalPage_yu:
                         totalPage = totalPage + 1
                     return json.dumps({'status': 'success', 'code': 200, 'totalCount': totalCount, 'totalPage': totalPage, 'data': d_list})
+                    # return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
+                else:
+                    return json.dumps({'status': 'fail', 'code': 15})
+                # while True:
+                #     posts = stock_great_retail.get_datas(date_data)
+                #     if posts:
+                #         d_list = []
+                #         for i in posts:
+                #             d_dict = OrderedDict()
+                #             d_dict['code'] = i.code
+                #             d_dict['update_date'] = i.update_date
+                #             d_dict['shareholder_falling_count'] = i.shareholder_falling_count
+                #             d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
+                #             d_dict['float_share'] = i.float_share
+                #             d_list.append(d_dict)
+                #         return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
+                #     else:
+                #         date_ts = date_ts - 24*3600
+                #         date_data = time.strftime('%Y%m%d', time.localtime(date_ts))
+            else:
+                return json.dumps({'status': 'fail', 'code': 401, 'message': 'unauthorization operation'})
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return json.dumps({'status': 'fail', 'code': 500, 'message': str(e)})
+
+class ViewOne:
+    def POST(self):
+        try:
+            web.header("Access-Control-Allow-Origin", "*")
+            token = web.input().token
+            code = web.input().code
+            update_date = web.input().update_date
+            # date_data = web.input().date_data
+            # date_ts = int(time.time())
+            # date_data = time.strftime('%Y%m%d', time.localtime(date_ts))
+    
+            try:
+                parse_token = jwt.decode(token, 'secret', algorithms='HS256')
+            except Exception as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return json.dumps({'status': 'fail', 'code': 402, 'message': 'token expired'})
+                
+            username = parse_token['username']
+            e = casbin.Enforcer("confs/model.conf", "confs/policy.csv")
+            sub = username
+            act = 'read'
+            if e.enforce(sub, dom, obj, act):
+                posts = stock_great_retail.get_one_data(code, update_date)
+                if posts:
+                    d_list = []
+                    for i in posts:
+                        d_dict = OrderedDict()
+                        d_dict['code'] = i.code
+                        d_dict['update_date'] = i.update_date
+                        d_dict['shareholder_falling_count'] = i.shareholder_falling_count
+                        d_dict['sdlu_great_retail_count'] = i.sdlu_great_retail_count
+                        d_dict['float_share'] = i.float_share
+                        d_dict['name'] = i.name
+                        d_dict['create_date'] = i.create_date
+                        d_dict['html_path'] = i.html_path
+                        d_list.append(d_dict)
+                    return json.dumps({'status': 'success', 'code': 200, 'totalCount': 1, 'totalPage': 1, 'data': d_list})
                     # return json.dumps({'status': 'success', 'code': 200, 'data': d_list})
                 else:
                     return json.dumps({'status': 'fail', 'code': 15})
